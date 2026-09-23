@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InstaAuto CRM — @automationguru_ji</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#08090f;--bg2:#0f1018;--bg3:#161720;--card:#191a27;
+  --border:#22243a;--border2:#2a2c45;
+  --p1:#E1306C;--p2:#833AB4;--p3:#F77737;--p4:#FCAF45;
+  --grad:linear-gradient(135deg,#E1306C 0%,#833AB4 50%,#F77737 100%);
+  --grad2:linear-gradient(90deg,#E1306C,#F77737);
+  --text:#eef0ff;--text2:#8a8fb5;--text3:#4a4d6e;
+  --success:#00d4aa;--warn:#ffb347;--danger:#ff6b6b;--info:#74b9ff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
+
+/* ── Layout ── */
+.app{display:flex;height:100vh;}
+.sidebar{width:232px;min-width:232px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── Sidebar ── */
+.sb-logo{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.sb-logo-icon{width:34px;height:34px;border-radius:9px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.sb-logo-name{font-weight:700;font-size:14px;letter-spacing:-.2px;}
+.sb-logo-sub{font-size:10px;color:var(--text2);}
+
+.sb-account{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.sb-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid #E1306C;}
+.sb-acc-name{font-weight:600;font-size:12px;}
+.sb-acc-handle{font-size:11px;color:var(--text2);}
+.sb-live{margin-left:auto;display:flex;align-items:center;gap:4px;font-size:10px;color:var(--success);}
+.sb-live::before{content:'';width:6px;height:6px;background:var(--success);border-radius:50%;animation:pulse-dot 1.5s infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+.nav-group{padding:10px 8px;}
+.nav-grp-label{font-size:9px;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;padding:4px 8px 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:all .18s;margin-bottom:1px;user-select:none;}
+.nav-item:hover{background:var(--bg3);}
+.nav-item.active{background:rgba(225,48,108,.12);color:var(--p1);}
+.nav-item.active .ni{color:var(--p1);}
+.ni{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.nt{font-size:12.5px;font-weight:500;flex:1;}
+.nb{margin-left:auto;background:var(--p1);color:#fff;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:700;}
+
+.sb-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--border);}
+.sb-status-text{font-size:11px;color:var(--text2);}
+.sb-status-sub{font-size:10px;color:var(--text3);margin-top:3px;}
+
+/* ── Topbar ── */
+.topbar{height:56px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:14px;flex-shrink:0;}
+.page-ttl{font-size:17px;font-weight:700;letter-spacing:-.3px;}
+.page-sub{font-size:11px;color:var(--text2);margin-top:1px;}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+
+/* ── Buttons ── */
+.btn{padding:7px 15px;border-radius:8px;border:none;cursor:pointer;font-size:12.5px;font-weight:600;transition:all .18s;display:inline-flex;align-items:center;gap:5px;font-family:inherit;}
+.btn-grad{background:var(--grad);color:#fff;}
+.btn-grad:hover{opacity:.88;transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.btn-outline:hover{background:var(--bg3);color:var(--text);}
+.btn-ghost{background:transparent;color:var(--text2);}
+.btn-ghost:hover{background:var(--bg3);color:var(--text);}
+.btn-sm{padding:5px 11px;font-size:11.5px;}
+.btn-success{background:rgba(0,212,170,.15);color:var(--success);border:1px solid rgba(0,212,170,.3);}
+.btn-success:hover{background:rgba(0,212,170,.25);}
+
+/* ── Content ── */
+.content{flex:1;overflow-y:auto;padding:22px;scrollbar-gutter:stable;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── Stat Cards ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden;transition:transform .2s;}
+.stat-card:hover{transform:translateY(-2px);}
+.stat-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.stat-label{font-size:11px;color:var(--text2);font-weight:500;text-transform:none;letter-spacing:0;}
+.stat-icon-bg{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.stat-value{font-size:26px;font-weight:800;letter-spacing:-1px;margin-bottom:5px;}
+.stat-change{font-size:11.5px;display:flex;align-items:center;gap:4px;font-weight:500;}
+.up{color:var(--success);}
+.dn{color:var(--danger);}
+.stat-bar{height:3px;border-radius:2px;margin-top:10px;background:var(--border);}
+.stat-bar-fill{height:100%;border-radius:2px;transition:width 1s ease;}
+
+/* ── Charts ── */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.chart-title{font-size:13px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.chart-container{position:relative;}
+.charts-row2{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:20px;}
+.charts-row3{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+
+/* ── Posts Grid ── */
+.posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;}
+.post-card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
+.post-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px rgba(0,0,0,.45);border-color:var(--p1);}
+.post-img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
+.post-info{padding:9px 10px;}
+.post-topic{font-size:10.5px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px;}
+.post-stats-row{display:flex;gap:10px;}
+.psr{display:flex;align-items:center;gap:3px;font-size:10.5px;color:var(--text3);}
+.post-overlay{position:absolute;inset:0;background:rgba(8,9,15,.78);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;transition:opacity .2s;}
+.post-card:hover .post-overlay{opacity:1;}
+.ov-stat{font-size:12.5px;font-weight:600;color:#fff;display:flex;align-items:center;gap:4px;}
+.post-badge{position:absolute;top:7px;left:7px;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:700;}
+.pb-ai{background:rgba(225,48,108,.85);color:#fff;}
+.pb-auto{background:rgba(0,212,170,.85);color:#fff;}
+.pb-manual{background:rgba(116,185,255,.85);color:#fff;}
+
+/* ── Filter bar ── */
+.filter-bar{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.filter-btn{padding:5px 13px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:11.5px;cursor:pointer;transition:all .18s;font-family:inherit;}
+.filter-btn.active,.filter-btn:hover{background:var(--p1);color:#fff;border-color:var(--p1);}
+.search-box{padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:12px;outline:none;min-width:190px;font-family:inherit;}
+.search-box:focus{border-color:var(--p1);}
+#posts-count-label{margin-left:auto;font-size:11px;color:var(--text3);}
+
+/* ── Calendar ── */
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.cal-nav{display:flex;align-items:center;gap:14px;}
+.cal-month-label{font-size:18px;font-weight:700;}
+.cal-nav-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:5px 13px;border-radius:7px;cursor:pointer;font-size:15px;font-family:inherit;transition:background .18s;}
+.cal-nav-btn:hover{background:var(--border2);}
+.cal-legend{display:flex;gap:14px;align-items:center;font-size:11px;color:var(--text2);}
+.cal-leg-dot{width:9px;height:9px;border-radius:50%;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-day-lbl{text-align:center;font-size:10px;font-weight:600;color:var(--text3);padding:7px 0;text-transform:uppercase;letter-spacing:.4px;}
+.cal-cell{min-height:82px;background:var(--card);border:1px solid var(--border);border-radius:7px;padding:7px;cursor:pointer;transition:all .18s;position:relative;}
+.cal-cell:hover{border-color:var(--p1);}
+.cal-cell.empty{background:transparent;border-color:transparent;cursor:default;pointer-events:none;}
+.cal-cell.today{border-color:var(--p1);background:rgba(225,48,108,.05);}
+.cal-cell.has-post{background:rgba(131,58,180,.07);}
+.cal-date-num{font-size:11.5px;font-weight:700;color:var(--text2);margin-bottom:5px;}
+.cal-cell.today .cal-date-num{color:var(--p1);}
+.cal-thumb{width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;margin-bottom:3px;}
+.cal-mini-topic{font-size:8.5px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cal-dot-row{display:flex;gap:3px;margin-top:4px;}
+.cal-dot{width:6px;height:6px;border-radius:50%;background:var(--p1);}
+
+/* ── Modal ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.87);display:flex;align-items:center;justify-content:center;z-index:900;opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-bg.open{opacity:1;pointer-events:all;}
+.modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;max-width:880px;width:95%;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;transform:scale(.93);transition:transform .25s;}
+.modal-bg.open .modal-box{transform:scale(1);}
+.modal-inner{display:flex;overflow:hidden;flex:1;}
+.modal-img{width:46%;object-fit:cover;flex-shrink:0;}
+.modal-info{flex:1;padding:22px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
+.modal-close{position:absolute;top:14px;right:14px;background:rgba(0,0,0,.6);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;z-index:10;}
+.modal-close:hover{background:var(--p1);}
+.m-hdr{display:flex;align-items:center;gap:10px;}
+.m-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;}
+.m-uname{font-size:13px;font-weight:700;}
+.m-time{font-size:11px;color:var(--text2);}
+.m-caption{font-size:12.5px;line-height:1.65;color:var(--text);white-space:pre-wrap;}
+.m-hashtags{font-size:12.5px;color:var(--info);line-height:1.75;}
+.m-stats{display:flex;gap:18px;padding:12px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.m-stat{display:flex;align-items:center;gap:6px;font-size:12.5px;}
+.m-stat strong{font-size:15px;font-weight:700;}
+.m-reasoning{background:var(--bg3);border-radius:9px;padding:12px;}
+.m-reas-lbl{font-size:10px;color:var(--text2);font-weight:600;letter-spacing:.5px;margin-bottom:6px;}
+.m-reas-text{font-size:12px;color:var(--text);line-height:1.6;}
+
+/* ── Generate Tab ── */
+.gen-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.gen-form{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;}
+.gen-preview{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:14px;}
+.mode-tabs{display:flex;background:var(--bg3);border-radius:9px;padding:3px;margin-bottom:18px;}
+.mode-tab{flex:1;padding:7px;text-align:center;border-radius:7px;cursor:pointer;font-size:12.5px;font-weight:500;transition:all .2s;color:var(--text2);}
+.mode-tab.active{background:var(--p1);color:#fff;}
+.form-grp{margin-bottom:14px;}
+.form-lbl{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block;}
+.form-inp,.form-sel,.form-ta{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:8px 11px;color:var(--text);font-size:12.5px;outline:none;font-family:inherit;transition:border-color .18s;}
+.form-inp:focus,.form-ta:focus{border-color:var(--p1);}
+.form-ta{resize:vertical;min-height:90px;}
+.form-sel{cursor:pointer;}
+.form-sel option{background:var(--bg3);}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--border);}
+.tgl{position:relative;width:42px;height:22px;}
+.tgl input{opacity:0;width:0;height:0;}
+.tgl-slider{position:absolute;cursor:pointer;inset:0;background:var(--border2);border-radius:22px;transition:.3s;}
+.tgl-slider::before{content:'';position:absolute;height:16px;width:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
+.tgl input:checked+.tgl-slider{background:var(--p1);}
+.tgl input:checked+.tgl-slider::before{transform:translateX(20px);}
+.ph-wrapper{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text3);}
+.ph-icon{font-size:44px;opacity:.45;}
+
+/* Instagram Phone Preview */
+.ig-frame{background:#000;border-radius:12px;border:1px solid var(--border2);overflow:hidden;display:none;}
+.ig-frame.show{display:block;}
+.ig-top{display:flex;align-items:center;gap:9px;padding:10px 13px;}
+.ig-top-av{width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid #E1306C;}
+.ig-top-name{font-size:12px;font-weight:700;}
+.ig-top-follow{margin-left:auto;font-size:11px;color:var(--p1);font-weight:600;}
+.ig-post-img{width:100%;aspect-ratio:1;object-fit:cover;}
+.ig-actions-row{display:flex;gap:14px;padding:10px 13px;font-size:20px;}
+.ig-bl{margin-left:auto;}
+.ig-likes{padding:0 13px;font-size:12px;font-weight:700;}
+.ig-cap{padding:0 13px 13px;font-size:12px;line-height:1.5;}
+.ig-hash{color:var(--info);}
+.meta-card{background:var(--bg3);border-radius:9px;padding:12px;margin-top:4px;display:none;}
+.meta-card.show{display:block;}
+.meta-lbl{font-size:10px;color:var(--text2);font-weight:600;letter-spacing:.5px;margin-bottom:6px;}
+.meta-text{font-size:12px;color:var(--text);line-height:1.55;}
+.pub-actions{display:none;gap:8px;margin-top:8px;}
+.pub-actions.show{display:flex;}
+
+/* Spinner */
+.spinner-wrapper{flex:1;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
+.spinner-wrapper.show{display:flex;}
+.spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--p1);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.spin-dots{display:flex;gap:6px;}
+.spin-dot{width:7px;height:7px;background:var(--p1);border-radius:50%;animation:bop .55s alternate infinite;}
+.spin-dot:nth-child(2){animation-delay:.18s;background:var(--p2);}
+.spin-dot:nth-child(3){animation-delay:.36s;background:var(--p3);}
+@keyframes bop{to{transform:translateY(-7px);opacity:.4;}}
+
+/* ── Analytics ── */
+.analytics-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+
+/* Heatmap */
+#heatmap-wrap{display:flex;flex-direction:column;gap:3px;}
+.hm-row{display:flex;align-items:center;gap:3px;}
+.hm-lbl{font-size:9px;color:var(--text3);width:26px;text-align:right;padding-right:4px;flex-shrink:0;}
+.hm-cells{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;flex:1;}
+.hm-cell{height:16px;border-radius:3px;cursor:pointer;transition:transform .1s;}
+.hm-cell:hover{transform:scale(1.25);}
+.hm-xlbls{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;padding-left:30px;margin-bottom:4px;}
+.hm-xlbl{font-size:8px;color:var(--text3);text-align:center;}
+
+/* ── Top Posts Table ── */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{text-align:left;font-size:10.5px;color:var(--text3);font-weight:600;padding:8px 11px;border-bottom:1px solid var(--border);}
+.tbl td{padding:9px 11px;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle;}
+.tbl tr:hover td{background:var(--bg3);}
+.tbl-thumb{width:38px;height:38px;object-fit:cover;border-radius:6px;}
+.tbl-topic{font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ── Workflow ── */
+.wf-wrap{overflow-x:auto;padding-bottom:10px;}
+.wf-ttl{font-size:15px;font-weight:700;margin-bottom:3px;}
+.wf-sub{font-size:12px;color:var(--text2);margin-bottom:22px;}
+.wf-main-grid{display:grid;grid-template-columns:1fr 310px;gap:22px;}
+.wf-flow{display:flex;flex-direction:column;align-items:center;gap:7px;}
+.wf-arr{color:var(--text3);font-size:17px;text-align:center;}
+.wf-parallel{display:flex;gap:12px;justify-content:center;}
+.node{border-radius:10px;padding:10px 14px;min-width:150px;text-align:center;transition:all .2s;cursor:default;border:1px solid;}
+.node:hover{transform:translateY(-2px);}
+.n-ico{font-size:19px;margin-bottom:3px;}
+.n-ttl{font-size:11.5px;font-weight:700;}
+.n-sub{font-size:9.5px;margin-top:2px;}
+.n-trg{border-color:var(--success);background:rgba(0,212,170,.07);color:var(--text);}
+.n-sub.n-trg-sub{color:var(--success);}
+.n-api{border-color:var(--info);background:rgba(116,185,255,.07);}
+.n-sub.n-api-sub{color:var(--info);}
+.n-ai{border-color:var(--p1);background:rgba(225,48,108,.07);}
+.n-sub.n-ai-sub{color:var(--p1);}
+.n-code{border-color:var(--p4);background:rgba(252,175,69,.07);}
+.n-sub.n-code-sub{color:var(--p4);}
+.n-dec{border-color:var(--warn);background:rgba(255,179,71,.07);}
+.n-sub.n-dec-sub{color:var(--warn);}
+.n-act{border-color:var(--p2);background:rgba(131,58,180,.07);}
+.n-sub.n-act-sub{color:var(--p2);}
+.wf-branches{display:flex;gap:30px;align-items:flex-start;justify-content:center;}
+.wf-branch{display:flex;flex-direction:column;align-items:center;gap:7px;}
+.branch-lbl{font-size:10px;background:var(--bg3);color:var(--text3);border-radius:5px;padding:2px 9px;border:1px solid var(--border);}
+.wf-side-flows{display:flex;flex-direction:column;gap:16px;}
+.side-flow-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px;}
+.sfc-lbl{font-size:11px;font-weight:700;margin-bottom:12px;padding:3px 9px;border-radius:20px;display:inline-block;}
+.sfc-lbl.wh1{background:rgba(116,185,255,.12);color:var(--info);}
+.sfc-lbl.wh2{background:rgba(0,212,170,.12);color:var(--success);}
+.sfc-steps{display:flex;flex-direction:column;gap:8px;}
+.sfc-step{display:flex;align-items:center;gap:9px;font-size:11.5px;}
+.sfc-step-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.sfc-step-txt{font-size:11.5px;font-weight:600;}
+.sfc-step-sub{font-size:10px;color:var(--text3);}
+.sfc-arr{font-size:12px;color:var(--text3);padding-left:13px;}
+
+/* ── Settings ── */
+.settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.settings-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.sc-ttl{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+/* ── Tags ── */
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:600;}
+.tag-s{background:rgba(0,212,170,.13);color:var(--success);}
+.tag-p{background:rgba(131,58,180,.13);color:var(--p2);}
+.tag-i{background:rgba(116,185,255,.13);color:var(--info);}
+.tag-w{background:rgba(255,179,71,.13);color:var(--warn);}
+.tag-r{background:rgba(255,107,107,.13);color:var(--danger);}
+.tag-pk{background:rgba(225,48,108,.13);color:var(--p1);}
+
+/* ── Activity list ── */
+.act-list{display:flex;flex-direction:column;gap:11px;}
+.act-item{display:flex;align-items:flex-start;gap:10px;}
+.act-icon-bg{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.act-name{font-size:12.5px;font-weight:500;}
+.act-time{font-size:10.5px;color:var(--text3);margin-top:2px;}
+
+/* ── Section headers ── */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-ttl{font-size:13.5px;font-weight:700;}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--card);border:1px solid var(--border2);border-radius:11px;padding:11px 18px;display:flex;align-items:center;gap:9px;transform:translateY(80px);opacity:0;transition:all .3s;z-index:1100;max-width:300px;pointer-events:none;}
+.toast.visible{transform:translateY(0);opacity:1;pointer-events:all;}
+.toast-ico{font-size:18px;}
+.toast-txt{font-size:12.5px;}
+
+/* ── Gradient text ── */
+.grad-txt{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text3);}
+
+/* ── Section spacer ── */
+.mb14{margin-bottom:14px;}
+.mb20{margin-bottom:20px;}
+.flex-row{display:flex;align-items:center;gap:10px;}
+.space-between{justify-content:space-between;}
+</style>
+</head>
+<body>
+<div class="app">
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">📱</div>
+    <div>
+      <div class="sb-logo-name">InstaAuto CRM</div>
+      <div class="sb-logo-sub">by Replora · Automateup</div>
+    </div>
+  </div>
+  <div class="sb-account">
+    <img class="sb-avatar" src="https://picsum.photos/seed/devdabi99/80/80" alt="avatar">
+    <div>
+      <div class="sb-acc-name">Automation Guru Ji</div>
+      <div class="sb-acc-handle">@automationguru_ji</div>
+    </div>
+    <div class="sb-live">Live</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-grp-label">Overview</div>
+    <div class="nav-item active" onclick="switchTab('dashboard',this,'Dashboard','Real-time Instagram performance overview')">
+      <span class="ni">🏠</span><span class="nt">Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('posts',this,'Posts Library','All 25 published posts with analytics')">
+      <span class="ni">📸</span><span class="nt">Posts Library</span><span class="nb">25</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('calendar',this,'Post Calendar','Visual calendar of published &amp; scheduled posts')">
+      <span class="ni">📅</span><span class="nt">Post Calendar</span>
+    </div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-grp-label">Tools</div>
+    <div class="nav-item" onclick="switchTab('generate',this,'AI Generate Post','Create AI-powered Instagram content')">
+      <span class="ni">✨</span><span class="nt">AI Generate</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('analytics',this,'Analytics','Deep-dive metrics, heatmaps &amp; top posts')">
+      <span class="ni">📊</span><span class="nt">Analytics</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('workflow',this,'Workflow Viewer','Visual n8n automation pipeline diagram')">
+      <span class="ni">🔄</span><span class="nt">Workflow</span>
+    </div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-grp-label">System</div>
+    <div class="nav-item" onclick="switchTab('settings',this,'Settings','API keys, environment variables &amp; config')">
+      <span class="ni">⚙️</span><span class="nt">Settings</span>
+    </div>
+  </div>
+  <div class="sb-footer">
+    <div class="flex-row">
+      <span class="sb-live">Active</span>
+      <span class="sb-status-text">n8n Workflow Running</span>
+    </div>
+    <div class="sb-status-sub">Last trigger: Today 9:00 AM IST</div>
+  </div>
+</nav>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-ttl" id="page-title">Dashboard</div>
+      <div class="page-sub" id="page-sub">Real-time Instagram performance overview</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-outline" onclick="showToast('🔄 Data refreshed!','s')">🔄 Refresh</button>
+      <button class="btn btn-grad" onclick="switchTab('generate',null,'AI Generate Post','Create AI-powered Instagram content')">✨ New Post</button>
+    </div>
+  </div>
+  <div class="content" id="main-content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="tab-panel active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-label">Total Followers</div>
+            <div class="stat-icon-bg" style="background:rgba(225,48,108,.12);">👥</div>
+          </div>
+          <div class="stat-value grad-txt">12,450</div>
+          <div class="stat-change up">↑ +284 this week</div>
+          <div class="stat-bar"><div class="stat-bar-fill" style="width:72%;background:var(--p1);"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-label">Avg. Reach / Post</div>
+            <div class="stat-icon-bg" style="background:rgba(131,58,180,.12);">👁️</div>
+          </div>
+          <div class="stat-value grad-txt">3,820</div>
+          <div class="stat-change up">↑ +12.4% vs last month</div>
+          <div class="stat-bar"><div class="stat-bar-fill" style="width:58%;background:var(--p2);"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-label">Engagement Rate</div>
+            <div class="stat-icon-bg" style="background:rgba(247,119,55,.12);">💬</div>
+          </div>
+          <div class="stat-value grad-txt">4.7%</div>
+          <div class="stat-change up">↑ +0.3% vs last month</div>
+          <div class="stat-bar"><div class="stat-bar-fill" style="width:47%;background:var(--p3);"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-label">Posts This Month</div>
+            <div class="stat-icon-bg" style="background:rgba(0,212,170,.12);">📸</div>
+          </div>
+          <div class="stat-value grad-txt">9</div>
+          <div class="stat-change up">↑ On track (30/mo goal)</div>
+          <div class="stat-bar"><div class="stat-bar-fill" style="width:30%;background:var(--success);"></div></div>
+        </div>
+      </div>
+
+      <div class="charts-row2 mb20">
+        <div class="chart-card">
+          <div class="chart-title">
+            <span>Engagement Trend — Last 14 Days</span>
+            <span class="tag tag-s">↑ Growing</span>
+          </div>
+          <div class="chart-container" style="height:195px;">
+            <canvas id="chartEngagement"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Content Mix</div>
+          <div class="chart-container" style="height:195px;">
+            <canvas id="chartMix"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:3fr 2fr;gap:14px;">
+        <div class="chart-card">
+          <div class="sec-hdr">
+            <div class="sec-ttl">Recent Posts</div>
+            <button class="btn btn-ghost btn-sm" onclick="switchTab('posts',null,'Posts Library','All 25 published posts with analytics')">View All →</button>
+          </div>
+          <div class="posts-grid" id="dash-recent-posts" style="grid-template-columns:repeat(4,1fr);"></div>
+        </div>
+        <div class="chart-card">
+          <div class="sec-hdr"><div class="sec-ttl">Recent Activity</div></div>
+          <div class="act-list" id="activity-list">
+            <div class="act-item">
+              <div class="act-icon-bg" style="background:rgba(0,212,170,.13);">✅</div>
+              <div><div class="act-name">Post Auto-Published</div><div class="act-time">2 hours ago · AI Generated by Claude</div></div>
+            </div>
+            <div class="act-item">
+              <div class="act-icon-bg" style="background:rgba(252,175,69,.13);">💬</div>
+              <div><div class="act-name">WhatsApp Notification Sent</div><div class="act-time">2 hours ago · +91 98765 43210</div></div>
+            </div>
+            <div class="act-item">
+              <div class="act-icon-bg" style="background:rgba(116,185,255,.13);">📊</div>
+              <div><div class="act-name">Instagram Data Fetched</div><div class="act-time">2 hours ago · 25 posts analysed</div></div>
+            </div>
+            <div class="act-item">
+              <div class="act-icon-bg" style="background:rgba(225,48,108,.13);">✨</div>
+              <div><div class="act-name">AI Content Generated</div><div class="act-time">2 hours ago · Claude Sonnet 4.6</div></div>
+            </div>
+            <div class="act-item">
+              <div class="act-icon-bg" style="background:rgba(131,58,180,.13);">⏰</div>
+              <div><div class="act-name">Daily Schedule Triggered</div><div class="act-time">2 hours ago · 9:00 AM IST</div></div>
+            </div>
+            <div class="act-item">
+              <div class="act-icon-bg" style="background:rgba(0,212,170,.13);">✅</div>
+              <div><div class="act-name">Post Published Yesterday</div><div class="act-time">Yesterday · 10:05 AM IST</div></div>
+            </div>
+            <div class="act-item">
+              <div class="act-icon-bg" style="background:rgba(116,185,255,.13);">🔀</div>
+              <div><div class="act-name">Hashtag Analysis Completed</div><div class="act-time">Yesterday · 9:58 AM IST</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ POSTS LIBRARY ═══ -->
+    <div class="tab-panel" id="tab-posts">
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterPosts('all',this)">All Posts</button>
+        <button class="filter-btn" onclick="filterPosts('ai',this)">🤖 AI Generated</button>
+        <button class="filter-btn" onclick="filterPosts('auto',this)">⚡ Auto Published</button>
+        <button class="filter-btn" onclick="filterPosts('manual',this)">✍️ Manual</button>
+        <input type="text" class="search-box" placeholder="🔍 Search posts..." oninput="searchPosts(this.value)">
+        <span id="posts-count-label">Showing 25 posts</span>
+      </div>
+      <div class="posts-grid" id="all-posts-grid"></div>
+    </div>
+
+    <!-- ═══ CALENDAR ═══ -->
+    <div class="tab-panel" id="tab-calendar">
+      <div class="cal-hdr">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+          <div class="cal-month-label" id="cal-month-lbl">September 2026</div>
+          <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="cal-legend">
+          <div style="display:flex;align-items:center;gap:5px;"><div class="cal-leg-dot" style="background:var(--p1);"></div>Has Post</div>
+          <div style="display:flex;align-items:center;gap:5px;"><div class="cal-leg-dot" style="border:2px solid var(--p1);background:transparent;"></div>Today</div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="cal-grid" id="cal-day-labels">
+          <div class="cal-day-lbl">Sun</div><div class="cal-day-lbl">Mon</div><div class="cal-day-lbl">Tue</div>
+          <div class="cal-day-lbl">Wed</div><div class="cal-day-lbl">Thu</div><div class="cal-day-lbl">Fri</div><div class="cal-day-lbl">Sat</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+    </div>
+
+    <!-- ═══ GENERATE ═══ -->
+    <div class="tab-panel" id="tab-generate">
+      <div class="gen-layout">
+        <div class="gen-form">
+          <div class="sec-ttl mb14">✨ AI Post Generator</div>
+          <div class="mode-tabs">
+            <div class="mode-tab active" onclick="setGenMode('auto',this)">⚡ Auto (Data-Driven)</div>
+            <div class="mode-tab" onclick="setGenMode('prompt',this)">✍️ Custom Prompt</div>
+          </div>
+          <div id="auto-fields">
+            <div class="form-grp">
+              <label class="form-lbl">Business Niche</label>
+              <input class="form-inp" value="AI Automation &amp; Business Tools">
+            </div>
+            <div class="form-grp">
+              <label class="form-lbl">Target Audience</label>
+              <input class="form-inp" value="Entrepreneurs &amp; Small Business Owners in India">
+            </div>
+            <div class="form-grp">
+              <label class="form-lbl">Post Topic / Theme (optional)</label>
+              <input class="form-inp" id="gen-topic" placeholder="e.g. How n8n saved a client 25 hrs/week">
+            </div>
+            <div class="form-grp">
+              <label class="form-lbl">Tone</label>
+              <select class="form-sel" id="gen-tone">
+                <option>Informative &amp; Educational</option>
+                <option>Motivational</option>
+                <option>Casual &amp; Hinglish</option>
+                <option>Professional</option>
+                <option>Story-telling</option>
+              </select>
+            </div>
+          </div>
+          <div id="prompt-fields" style="display:none;">
+            <div class="form-grp">
+              <label class="form-lbl">Your Prompt</label>
+              <textarea class="form-ta" id="gen-prompt" style="min-height:140px;" placeholder="Kya chahiye aapko? e.g. 'Write a post about how WhatsApp automation helped a restaurant owner get 3x more orders'"></textarea>
+            </div>
+          </div>
+          <div class="form-grp">
+            <label class="form-lbl">Post Image</label>
+            <select class="form-sel" id="gen-image-sel">
+              <option value="https://picsum.photos/seed/genai1/600/600">Tech &amp; AI (Auto-Selected)</option>
+              <option value="https://picsum.photos/seed/genai2/600/600">Business Growth</option>
+              <option value="https://picsum.photos/seed/genai3/600/600">Digital Marketing</option>
+              <option value="https://picsum.photos/seed/genai4/600/600">Success Story</option>
+              <option value="https://picsum.photos/seed/genai5/600/600">Behind the Scenes</option>
+            </select>
+          </div>
+          <div class="toggle-row form-grp">
+            <div>
+              <div class="form-lbl" style="margin:0 0 3px;">Auto-Publish After Generation</div>
+              <div style="font-size:10.5px;color:var(--text3);">Posts immediately to Instagram</div>
+            </div>
+            <label class="tgl"><input type="checkbox" id="gen-auto-pub"><span class="tgl-slider"></span></label>
+          </div>
+          <button class="btn btn-grad" style="width:100%;padding:11px;justify-content:center;font-size:14px;" onclick="generatePost()">✨ Generate with Claude AI</button>
+          <div style="margin-top:9px;text-align:center;font-size:10.5px;color:var(--text3);">Powered by Claude Sonnet 4.6 · Anthropic</div>
+        </div>
+        <div class="gen-preview">
+          <div class="sec-ttl">Instagram Preview</div>
+          <div class="ph-wrapper" id="gen-placeholder">
+            <div class="ph-icon">📱</div>
+            <div style="font-size:13px;font-weight:600;">Preview will appear here</div>
+            <div style="font-size:11.5px;">Click Generate to create your post</div>
+          </div>
+          <div class="spinner-wrapper" id="gen-spinner">
+            <div class="spinner"></div>
+            <div style="font-size:12.5px;color:var(--text2);">Claude is crafting your post…</div>
+            <div class="spin-dots"><div class="spin-dot"></div><div class="spin-dot"></div><div class="spin-dot"></div></div>
+          </div>
+          <div class="ig-frame" id="ig-preview-frame">
+            <div class="ig-top">
+              <img class="ig-top-av" src="https://picsum.photos/seed/devdabi99/80/80" alt="">
+              <div class="ig-top-name">automationguru_ji</div>
+              <div class="ig-top-follow">Follow</div>
+            </div>
+            <img class="ig-post-img" id="gen-prev-img" src="" alt="">
+            <div class="ig-actions-row">
+              <span>🤍</span><span>💬</span><span>📤</span><span class="ig-bl">🔖</span>
+            </div>
+            <div class="ig-likes" id="gen-prev-likes">1,234 likes</div>
+            <div class="ig-cap">
+              <strong>automationguru_ji</strong>&nbsp;<span id="gen-prev-cap"></span><br><br>
+              <span class="ig-hash" id="gen-prev-hash"></span>
+            </div>
+          </div>
+          <div class="meta-card" id="gen-meta">
+            <div class="meta-lbl">🤖 AI ANALYSIS</div>
+            <div class="meta-text" id="gen-meta-text"></div>
+          </div>
+          <div class="pub-actions" id="gen-pub-actions">
+            <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="copyGenCaption()">📋 Copy Caption</button>
+            <button class="btn btn-grad" style="flex:1;justify-content:center;" onclick="publishGenPost()">🚀 Publish Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ANALYTICS ═══ -->
+    <div class="tab-panel" id="tab-analytics">
+      <div class="analytics-kpis">
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-label">Total Impressions (30d)</div><div class="stat-icon-bg" style="background:rgba(225,48,108,.12);">📡</div></div>
+          <div class="stat-value grad-txt">1,27,450</div>
+          <div class="stat-change up">↑ +18.2% vs prev month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-label">Total Reach (30d)</div><div class="stat-icon-bg" style="background:rgba(131,58,180,.12);">👁️</div></div>
+          <div class="stat-value grad-txt">94,280</div>
+          <div class="stat-change up">↑ +14.7% vs prev month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-label">Total Interactions (30d)</div><div class="stat-icon-bg" style="background:rgba(0,212,170,.12);">💬</div></div>
+          <div class="stat-value grad-txt">8,942</div>
+          <div class="stat-change up">↑ +22.1% vs prev month</div>
+        </div>
+      </div>
+      <div class="charts-row3">
+        <div class="chart-card">
+          <div class="chart-title">Reach &amp; Impressions — Last 30 Days</div>
+          <div class="chart-container" style="height:210px;"><canvas id="chartReach"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Engagement by Post Type</div>
+          <div class="chart-container" style="height:210px;"><canvas id="chartPostType"></canvas></div>
+        </div>
+      </div>
+      <div class="chart-card mb20">
+        <div class="chart-title">Best Posting Hours — Engagement Heatmap</div>
+        <div style="padding-left:30px;margin-bottom:4px;">
+          <div class="hm-xlbls">
+            <span class="hm-xlbl">12a</span><span class="hm-xlbl">1a</span><span class="hm-xlbl">2a</span><span class="hm-xlbl">3a</span><span class="hm-xlbl">4a</span><span class="hm-xlbl">5a</span><span class="hm-xlbl">6a</span><span class="hm-xlbl">7a</span><span class="hm-xlbl">8a</span><span class="hm-xlbl">9a</span><span class="hm-xlbl">10a</span><span class="hm-xlbl">11a</span><span class="hm-xlbl">12p</span><span class="hm-xlbl">1p</span><span class="hm-xlbl">2p</span><span class="hm-xlbl">3p</span><span class="hm-xlbl">4p</span><span class="hm-xlbl">5p</span><span class="hm-xlbl">6p</span><span class="hm-xlbl">7p</span><span class="hm-xlbl">8p</span><span class="hm-xlbl">9p</span><span class="hm-xlbl">10p</span><span class="hm-xlbl">11p</span>
+          </div>
+        </div>
+        <div id="heatmap-wrap"></div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);">
+          <span>Low</span>
+          <div style="width:90px;height:5px;border-radius:3px;background:linear-gradient(90deg,#161720,#833AB4,#E1306C,#F77737);"></div>
+          <span>High Engagement</span>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="sec-hdr">
+          <div class="sec-ttl">Top Performing Posts</div>
+          <span class="tag tag-p">Sorted by Engagement Rate</span>
+        </div>
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Post</th><th>Topic</th><th>Date</th><th>Likes</th><th>Comments</th><th>Reach</th><th>Eng. Rate</th><th>Source</th>
+            </tr>
+          </thead>
+          <tbody id="top-posts-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ WORKFLOW ═══ -->
+    <div class="tab-panel" id="tab-workflow">
+      <div class="wf-wrap">
+        <div class="wf-ttl">Instagram Automation Workflow</div>
+        <div class="wf-sub">Visual representation of your n8n automation pipeline · 24 nodes · 3 sub-flows</div>
+        <div class="wf-main-grid">
+          <!-- Main Flow -->
+          <div>
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:14px;">Main Daily Flow</div>
+            <div class="wf-flow">
+              <div class="node n-trg" style="min-width:190px;">
+                <div class="n-ico">⏰</div>
+                <div class="n-ttl">Daily Schedule Trigger</div>
+                <div class="n-sub n-trg-sub">scheduleTrigger · every 24 hours</div>
+              </div>
+              <div class="wf-arr">↓</div>
+              <div class="wf-parallel">
+                <div class="node n-api" style="min-width:145px;">
+                  <div class="n-ico">📸</div>
+                  <div class="n-ttl">Fetch Posts</div>
+                  <div class="n-sub n-api-sub">Graph API · last 25</div>
+                </div>
+                <div class="node n-api" style="min-width:145px;">
+                  <div class="n-ico">📊</div>
+                  <div class="n-ttl">Fetch Insights</div>
+                  <div class="n-sub n-api-sub">Graph API · reach/impr</div>
+                </div>
+                <div class="node n-api" style="min-width:145px;">
+                  <div class="n-ico">#️⃣</div>
+                  <div class="n-ttl">Fetch Hashtags</div>
+                  <div class="n-sub n-api-sub">ig_hashtag_search</div>
+                </div>
+              </div>
+              <div class="wf-arr">↓</div>
+              <div class="node n-code" style="min-width:190px;">
+                <div class="n-ico">🔀</div>
+                <div class="n-ttl">Merge All Data</div>
+                <div class="n-sub n-code-sub">Merge · combineAll</div>
+              </div>
+              <div class="wf-arr">↓</div>
+              <div class="node n-code" style="min-width:190px;">
+                <div class="n-ico">🧮</div>
+                <div class="n-ttl">Analyze Instagram Data</div>
+                <div class="n-sub n-code-sub">Code · best hour, top posts</div>
+              </div>
+              <div class="wf-arr">↓</div>
+              <div class="node n-ai" style="min-width:190px;">
+                <div class="n-ico">🤖</div>
+                <div class="n-ttl">AI Generate Post Content</div>
+                <div class="n-sub n-ai-sub">Claude Sonnet · /v1/messages</div>
+              </div>
+              <div class="wf-arr">↓</div>
+              <div class="node n-code" style="min-width:190px;">
+                <div class="n-ico">⚙️</div>
+                <div class="n-ttl">Parse AI Response</div>
+                <div class="n-sub n-code-sub">Code · extract JSON</div>
+              </div>
+              <div class="wf-arr">↓</div>
+              <div class="node n-dec" style="min-width:190px;">
+                <div class="n-ico">❓</div>
+                <div class="n-ttl">Auto Post or Manual Review?</div>
+                <div class="n-sub n-dec-sub">IF · AUTO_POST_MODE == true</div>
+              </div>
+              <div class="wf-arr">↓</div>
+              <div class="wf-branches">
+                <div class="wf-branch">
+                  <div class="branch-lbl">✅ TRUE — Auto Publish</div>
+                  <div class="node n-act" style="min-width:155px;">
+                    <div class="n-ico">🖼️</div>
+                    <div class="n-ttl">Create Media Container</div>
+                    <div class="n-sub n-act-sub">POST /media</div>
+                  </div>
+                  <div class="wf-arr">↓</div>
+                  <div class="node n-code" style="min-width:155px;">
+                    <div class="n-ico">⏳</div>
+                    <div class="n-ttl">Wait 5 Seconds</div>
+                    <div class="n-sub n-code-sub">Media processing</div>
+                  </div>
+                  <div class="wf-arr">↓</div>
+                  <div class="node n-act" style="min-width:155px;">
+                    <div class="n-ico">🚀</div>
+                    <div class="n-ttl">Publish Post</div>
+                    <div class="n-sub n-act-sub">POST /media_publish</div>
+                  </div>
+                  <div class="wf-arr">↓</div>
+                  <div class="node n-api" style="min-width:155px;">
+                    <div class="n-ico">🔍</div>
+                    <div class="n-ttl">Get Post Details</div>
+                    <div class="n-sub n-api-sub">GET permalink, id</div>
+                  </div>
+                  <div class="wf-arr">↓</div>
+                  <div class="node n-act" style="min-width:155px;">
+                    <div class="n-ico">💬</div>
+                    <div class="n-ttl">WhatsApp Notification</div>
+                    <div class="n-sub n-act-sub">WA Business API</div>
+                  </div>
+                </div>
+                <div class="wf-branch">
+                  <div class="branch-lbl">📋 FALSE — Manual Review</div>
+                  <div class="node n-code" style="min-width:155px;">
+                    <div class="n-ico">👀</div>
+                    <div class="n-ttl">Return Post for Review</div>
+                    <div class="n-sub n-code-sub">Respond to Webhook</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Side Webhook Flows -->
+          <div>
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:14px;">Webhook Sub-Flows</div>
+            <div class="wf-side-flows">
+              <div class="side-flow-card">
+                <div class="sfc-lbl wh1">📥 POST /instagram-manual-post</div>
+                <div class="sfc-steps">
+                  <div class="sfc-step"><div class="sfc-step-icon" style="background:rgba(0,212,170,.12);">🪝</div><div><div class="sfc-step-txt">Manual Post Webhook</div><div class="sfc-step-sub">Receives {prompt} from user</div></div></div>
+                  <div class="sfc-arr">↓</div>
+                  <div class="sfc-step"><div class="sfc-step-icon" style="background:rgba(225,48,108,.12);">🤖</div><div><div class="sfc-step-txt">AI Generate from Prompt</div><div class="sfc-step-sub">Claude Sonnet · custom topic</div></div></div>
+                  <div class="sfc-arr">↓</div>
+                  <div class="sfc-step"><div class="sfc-step-icon" style="background:rgba(252,175,69,.12);">⚙️</div><div><div class="sfc-step-txt">Parse Prompt Response</div><div class="sfc-step-sub">Extract caption + hashtags</div></div></div>
+                  <div class="sfc-arr">↓</div>
+                  <div class="sfc-step"><div class="sfc-step-icon" style="background:rgba(131,58,180,.12);">📤</div><div><div class="sfc-step-txt">Return Post to User</div><div class="sfc-step-sub">JSON response</div></div></div>
+                </div>
+              </div>
+              <div class="side-flow-card">
+                <div class="sfc-lbl wh2">✅ POST /instagram-approve-post</div>
+                <div class="sfc-steps">
+                  <div class="sfc-step"><div class="sfc-step-icon" style="background:rgba(0,212,170,.12);">🪝</div><div><div class="sfc-step-txt">Approve &amp; Publish Webhook</div><div class="sfc-step-sub">Receives {caption} from client</div></div></div>
+                  <div class="sfc-arr">↓</div>
+                  <div class="sfc-step"><div class="sfc-step-icon" style="background:rgba(131,58,180,.12);">🖼️</div><div><div class="sfc-step-txt">Create Media Container</div><div class="sfc-step-sub">POST /media · Graph API</div></div></div>
+                  <div class="sfc-arr">↓</div>
+                  <div class="sfc-step"><div class="sfc-step-icon" style="background:rgba(252,175,69,.12);">⏳</div><div><div class="sfc-step-txt">Wait 5s → Publish</div><div class="sfc-step-sub">media_publish</div></div></div>
+                  <div class="sfc-arr">↓</div>
+                  <div class="sfc-step"><div class="sfc-step-icon" style="background:rgba(0,212,170,.12);">💬</div><div><div class="sfc-step-txt">WhatsApp + Respond</div><div class="sfc-step-sub">Notify + webhook response</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SETTINGS ═══ -->
+    <div class="tab-panel" id="tab-settings">
+      <div class="settings-grid">
+        <div class="settings-card">
+          <div class="sc-ttl">📸 Instagram API</div>
+          <div class="form-grp"><label class="form-lbl">Instagram Account ID</label><input class="form-inp" value="17841412345678" placeholder="INSTAGRAM_ACCOUNT_ID"></div>
+          <div class="form-grp"><label class="form-lbl">Access Token</label><input class="form-inp" type="password" value="EAAxxxxxxxxxxxxxxxxx" placeholder="INSTAGRAM_ACCESS_TOKEN"></div>
+          <div class="form-grp"><label class="form-lbl">Default Post Image URL</label><input class="form-inp" value="https://your-cdn.com/default-post.jpg"></div>
+        </div>
+        <div class="settings-card">
+          <div class="sc-ttl">💬 WhatsApp Business</div>
+          <div class="form-grp"><label class="form-lbl">Phone Number ID</label><input class="form-inp" value="1098765432100" placeholder="WHATSAPP_PHONE_NUMBER_ID"></div>
+          <div class="form-grp"><label class="form-lbl">WhatsApp Access Token</label><input class="form-inp" type="password" value="EAAyyyyyyyyyyyyy" placeholder="WHATSAPP_ACCESS_TOKEN"></div>
+          <div class="form-grp"><label class="form-lbl">Client WhatsApp Number</label><input class="form-inp" value="+91 98765 43210"></div>
+        </div>
+        <div class="settings-card">
+          <div class="sc-ttl">🤖 AI &amp; Content Config</div>
+          <div class="form-grp"><label class="form-lbl">Anthropic API Key</label><input class="form-inp" type="password" value="sk-ant-apixxxxxx" placeholder="ANTHROPIC_API_KEY"></div>
+          <div class="form-grp"><label class="form-lbl">Business Niche</label><input class="form-inp" value="AI Automation &amp; Business Tools" placeholder="BUSINESS_NICHE"></div>
+          <div class="form-grp"><label class="form-lbl">Service Description</label><textarea class="form-ta" style="min-height:65px;">We build custom AI automation systems using n8n, WhatsApp Business API, and CRM tools for small businesses in India.</textarea></div>
+          <div class="form-grp"><label class="form-lbl">Target Audience</label><input class="form-inp" value="Entrepreneurs &amp; SMB Owners in India"></div>
+        </div>
+        <div class="settings-card">
+          <div class="sc-ttl">⚙️ Workflow Config</div>
+          <div class="toggle-row form-grp">
+            <div><div class="form-lbl" style="margin:0 0 3px;">Auto Post Mode</div><div style="font-size:10.5px;color:var(--text3);">Posts without manual review</div></div>
+            <label class="tgl"><input type="checkbox" checked><span class="tgl-slider"></span></label>
+          </div>
+          <div class="form-grp"><label class="form-lbl">Niche Keyword (Hashtag Search)</label><input class="form-inp" value="automation" placeholder="NICHE_KEYWORD"></div>
+          <div class="form-grp"><label class="form-lbl">Schedule Interval (hours)</label><input class="form-inp" type="number" value="24" min="1" max="168"></div>
+          <div class="form-grp"><label class="form-lbl">n8n Instance URL</label><input class="form-inp" value="https://n8n.replora.in"></div>
+          <button class="btn btn-grad" style="width:100%;justify-content:center;" onclick="showToast('✅ Settings saved!','s')">Save All Settings</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ═══ POST MODAL ═══ -->
+<div class="modal-bg" id="post-modal-bg" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()" style="position:relative;">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-inner">
+      <img class="modal-img" id="modal-img" src="" alt="" style="max-height:88vh;">
+      <div class="modal-info">
+        <div class="m-hdr">
+          <img class="m-avatar" src="https://picsum.photos/seed/devdabi99/80/80" alt="">
+          <div>
+            <div class="m-uname">automationguru_ji</div>
+            <div class="m-time" id="modal-time">—</div>
+          </div>
+          <div style="margin-left:auto;" id="modal-badge-area"></div>
+        </div>
+        <div class="m-caption" id="modal-caption">—</div>
+        <div class="m-hashtags" id="modal-hashtags">—</div>
+        <div class="m-stats">
+          <div class="m-stat">❤️ <strong id="modal-likes">—</strong></div>
+          <div class="m-stat">💬 <strong id="modal-comments">—</strong></div>
+          <div class="m-stat">👁️ <strong id="modal-reach">—</strong></div>
+          <div class="m-stat">📊 <strong id="modal-er">—</strong> ER</div>
+        </div>
+        <div class="m-reasoning">
+          <div class="m-reas-lbl">🤖 AI REASONING</div>
+          <div class="m-reas-text" id="modal-reasoning">—</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="copyModalCaption()">📋 Copy Caption</button>
+          <button class="btn btn-ghost" style="flex:1;justify-content:center;" onclick="closeModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast">
+  <span class="toast-ico" id="toast-ico">✅</span>
+  <span class="toast-txt" id="toast-txt"></span>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  MOCK DATA
+// ══════════════════════════════════════════════
+const REF = new Date('2026-09-09T09:00:00');
+
+function makeDate(dAgo, h=9) {
+  const d = new Date(REF);
+  d.setDate(d.getDate() - dAgo);
+  d.setHours(h, Math.floor(Math.random()*15), 0, 0);
+  return d.toISOString();
+}
+
+const POSTS = [
+  {id:1,img:'https://picsum.photos/seed/agp1/600/600',
+   caption:'🚀 AI Automation ne hamara game badal diya!\n\nIs month hamne ek client ka poora social media automate kiya — n8n + Claude + Instagram API.\n\nResult? ✅ 20 hrs/week saved ✅ 3x more engagement ✅ Zero manual effort\n\nKya aap bhi automate karna chahte hain? Comment "AUTOMATE" ya DM karo! 👇',
+   hashtags:'#AIAutomation #n8n #InstagramAutomation #BusinessGrowth #NoCode #WorkflowAutomation #DigitalMarketing #EntrepreneurIndia #AutomateYourBusiness',
+   topic:'AI Automation Case Study',likes:342,comments:28,reach:4250,impressions:5100,er:8.7,
+   date:makeDate(0,9),ai:true,auto:true,
+   reasoning:'Peak engagement at 9 AM IST. Case study with concrete numbers drives 2.3x more saves. "AUTOMATE" CTA increases DM conversions by 45%.'},
+  {id:2,img:'https://picsum.photos/seed/agp2/600/600',
+   caption:'💡 WhatsApp Business API — Game Changer for Indian SMBs!\n\n3 reasons kyun har Indian business ko WhatsApp automation use karni chahiye:\n\n1️⃣ 500M+ WhatsApp users in India\n2️⃣ 98% message open rate\n3️⃣ Auto-handle inquiries, orders, reminders!\n\nHumne 50+ businesses ko setup kiya hai. Demo chahiye? 👆 Link in bio!',
+   hashtags:'#WhatsAppBusiness #WhatsAppAPI #BusinessAutomation #IndiaDigital #StartupIndia #ChatbotIndia #WhatsAppMarketing #SMBIndia',
+   topic:'WhatsApp Business API Guide',likes:289,comments:45,reach:3840,impressions:4620,er:7.2,
+   date:makeDate(1,10),ai:true,auto:true,
+   reasoning:'WhatsApp content gets 40% higher engagement in Indian market. Numbered list format increases saves by 3x.'},
+  {id:3,img:'https://picsum.photos/seed/agp3/600/600',
+   caption:'🎯 n8n Workflow Tutorial — Step by Step!\n\nAaj main bataunga exactly kaise humne ek restaurant owner ka order management system automate kiya.\n\n📌 WhatsApp → n8n → Google Sheets → Auto Reply\n\nFree template link in bio! 👆 Save this post — you\'ll need it later! 🔖',
+   hashtags:'#n8n #WorkflowAutomation #NoCode #LowCode #AutomationTutorial #n8nWorkflow #BusinessProcess #TechIndia #StartupTools',
+   topic:'n8n Step-by-Step Tutorial',likes:412,comments:67,reach:5120,impressions:6340,er:9.4,
+   date:makeDate(2,9),ai:false,auto:false,
+   reasoning:'Tutorial content with free templates gets 5x saves. "Save this post" CTA drives bookmark action.'},
+  {id:4,img:'https://picsum.photos/seed/agp4/600/600',
+   caption:'🏆 Client Win Alert!\n\n"Tumhare workflow ne meri life badi aasaan kar di" — @aaryan_textiles\n\nKya kiya humne? ✅ Instagram auto-posting ✅ WhatsApp order alerts ✅ Customer follow-up automation\n\nAb woh sirf product pe focus karte hain — baki sab automatic hai! 🎉\n\nAapke business ko bhi yahi chahiye? DM "AUTOMATE" 📩',
+   hashtags:'#ClientSuccess #AutomationWin #WhatsAppAutomation #InstagramGrowth #BusinessResults #EntrepreneurLife #WorkSmart #AutomateIndia',
+   topic:'Client Testimonial Story',likes:256,comments:38,reach:3290,impressions:3980,er:6.8,
+   date:makeDate(3,11),ai:true,auto:true,
+   reasoning:'Social proof content drives trust. Client names + specific results build credibility.'},
+  {id:5,img:'https://picsum.photos/seed/agp5/600/600',
+   caption:'📈 Instagram Growth Hacks 2026 — Jo Actually Work Karte Hain!\n\n1. Post daily at your peak hour (analytics check karo)\n2. Use 20-25 niche hashtags, not broad ones\n3. First comment mein hashtags dalo\n4. Stories + Reels + Feed — teenonka balance\n5. Auto-respond to DMs within 5 min\n\nIn tips ko follow karke hamne 12K followers reach kiye! 💪',
+   hashtags:'#InstagramGrowth #InstagramTips #GrowOnInstagram #SocialMediaMarketing #ContentCreator #IGTips2026 #DigitalMarketingIndia #FollowerGrowth',
+   topic:'Instagram Growth Tips 2026',likes:378,comments:52,reach:4780,impressions:5890,er:8.9,
+   date:makeDate(4,9),ai:true,auto:true,
+   reasoning:'List-based tips content has highest save rate. Numbered format is skimmable and shareable.'},
+  {id:6,img:'https://picsum.photos/seed/agp6/600/600',
+   caption:'🛠️ Top 5 AI Tools for Business in 2026!\n\n1. 🤖 Claude (Anthropic) — Best for writing & strategy\n2. ⚙️ n8n — Automation workflows, open source\n3. 💬 WhatsApp Business API — Customer communication\n4. 📊 Notion AI — Knowledge management\n5. 🎨 Midjourney — Visual content creation\n\nKaunsa tool aap already use karte hain? Comment karo! 👇',
+   hashtags:'#AITools2026 #ProductivityTools #BusinessAutomation #Claude #n8n #NotionAI #AIForBusiness #TechStack #StartupTools',
+   topic:'Top AI Tools 2026 Roundup',likes:445,comments:89,reach:5920,impressions:7340,er:9.8,
+   date:makeDate(5,10),ai:false,auto:false,
+   reasoning:'Tool comparison content gets highest engagement. Comment bait with questions increases reach algorithm.'},
+  {id:7,img:'https://picsum.photos/seed/agp7/600/600',
+   caption:'🎬 Behind the Scenes — Ek Client ka Automation Setup!\n\nAaj dikha raha hoon exactly kaise humne ek coaching institute ka full system banaya:\n\n📋 Lead capture from Instagram DMs\n⚡ Auto-qualification via WhatsApp bot\n📅 Google Calendar scheduling\n💳 Razorpay payment collection — all automated!\n\nTotal setup time: 3 days 🔥\nMonthly hours saved: 40+',
+   hashtags:'#BehindTheScenes #AutomationSetup #WorkflowDesign #n8nAutomation #BusinessSystems #CoachingBusiness #RazorpayIntegration #LeadGeneration',
+   topic:'Behind the Scenes Build',likes:298,comments:41,reach:3640,impressions:4480,er:7.5,
+   date:makeDate(6,9),ai:true,auto:true,
+   reasoning:'Behind-the-scenes content humanizes the brand and shows expertise without being salesy.'},
+  {id:8,img:'https://picsum.photos/seed/agp8/600/600',
+   caption:'⚡ Manual vs Automated Posting — The Real Comparison!\n\n✍️ Manual:\n⏱ 45 min/day for content\n😓 Inconsistent posting\n📉 Lower engagement (forget days)\n\n🤖 Automated:\n⏱ 5 min/week setup\n✅ Daily posts at peak time\n📈 3x better engagement\n\nMath clear hai — automation wins every time! 🏆\n\nWant to switch? DM "AUTO" 🚀',
+   hashtags:'#AutomationVsManual #SocialMediaAutomation #WorkSmart #InstagramAutomation #TimeManagement #ContentStrategy #BusinessEfficiency',
+   topic:'Automation vs Manual Comparison',likes:321,comments:56,reach:4120,impressions:5040,er:7.9,
+   date:makeDate(7,10),ai:true,auto:true,
+   reasoning:'Comparison content generates debate and comments. Clear contrast format is highly shareable.'},
+  {id:9,img:'https://picsum.photos/seed/agp9/600/600',
+   caption:'🎯 September Goals — Our Content Plan!\n\nIs month humara plan:\n📸 30 posts (daily posting)\n🎬 8 Reels\n📖 4 carousels\n💡 Weekly live sessions\n\nGoal: 15K followers by October 1! 🚀\n\nAapke September goals kya hain? Comment mein share karo! 👇\n\n#September2026 #Goals #ContentPlan',
+   hashtags:'#SeptemberGoals #ContentCalendar #GrowthMindset #InstagramGoals #ContentPlan2026 #CreatorLife #DigitalMarketing',
+   topic:'September Goals & Content Plan',likes:198,comments:43,reach:2480,impressions:3120,er:6.1,
+   date:makeDate(8,9),ai:false,auto:false,
+   reasoning:'Personal goal posts drive authenticity. Comment CTA asking audience goals boosts engagement.'},
+  {id:10,img:'https://picsum.photos/seed/agp10/600/600',
+   caption:'📊 August Recap — Kya Achieve Kiya?\n\n✅ 16 posts published\n✅ 1,284 new followers\n✅ 8 automation projects delivered\n✅ ₹2.4L revenue from automation services\n✅ 94K total reach\n\nSabse bada learning: Consistency + Automation = Growth 🔥\n\nKya August tumhare liye bhi productive tha? Comment karo!',
+   hashtags:'#AugustRecap #MonthlyReview #BusinessGrowth #AutomationResults #ContentCreator #MilestoneAlert #DigitalMarketing',
+   topic:'August Monthly Recap',likes:387,comments:72,reach:4890,impressions:5980,er:9.3,
+   date:makeDate(9,11),ai:true,auto:true,
+   reasoning:'Monthly recap with specific numbers builds credibility. Revenue mention shows business success.'},
+  {id:11,img:'https://picsum.photos/seed/agp11/600/600',
+   caption:'💡 AI Content Strategy — Hum Kaise Plan Karte Hain!\n\nHumara weekly workflow:\n\n📅 Monday: Data analysis (analytics check)\n🤖 Tuesday: AI generates 7 post ideas\n✏️ Wednesday: Review + edit\n📸 Thursday: Image creation\n🚀 Friday: Schedule for the week\n\nTotal time: 3 hours/week for 7 posts! 🎯\n\nTemplate chahiye? DM "STRATEGY" 📩',
+   hashtags:'#ContentStrategy #AIMarketing #ContentPlanning #SocialMediaStrategy #WorkflowAutomation #ProductivityHack #ContentCreation',
+   topic:'AI Content Strategy Workflow',likes:312,comments:48,reach:3920,impressions:4760,er:7.7,
+   date:makeDate(10,10),ai:true,auto:true,
+   reasoning:'Process transparency content builds authority. Specific time savings (3 hrs/week) is compelling.'},
+  {id:12,img:'https://picsum.photos/seed/agp12/600/600',
+   caption:'🎓 n8n for Beginners — Where to Start!\n\nAgar aap n8n naya seekh rahe hain, toh yeh path follow karo:\n\n1️⃣ Install n8n locally (Docker)\n2️⃣ Learn Webhook + HTTP Request nodes\n3️⃣ Connect Gmail/Google Sheets\n4️⃣ Build your first automation\n5️⃣ Add AI (OpenAI/Claude) for intelligence\n\nFree 2-hour YouTube crash course — link bio mein! 🎬',
+   hashtags:'#n8nBeginner #n8nTutorial #LearnAutomation #NoCode #WorkflowAutomation #TechLearning #AutomationForBeginners',
+   topic:'n8n Beginner Guide',likes:489,comments:93,reach:6240,impressions:7680,er:9.6,
+   date:makeDate(11,9),ai:false,auto:false,
+   reasoning:'Educational beginner content gets highest saves and shares. Beginner audience is largest segment.'},
+  {id:13,img:'https://picsum.photos/seed/agp13/600/600',
+   caption:'💰 ROI of Automation — Real Numbers!\n\nEk typical client:\n\nBefore Automation:\n❌ 3 employees for social + WhatsApp\n❌ ₹1.5L/month salary\n❌ Inconsistent response time\n\nAfter Automation:\n✅ 0 employees needed for these tasks\n✅ ₹15K/month automation cost\n✅ Instant 24/7 responses\n\nROI: 10x 🚀\n\nCalculate your ROI — DM "CALCULATE"',
+   hashtags:'#AutomationROI #BusinessEfficiency #CostSaving #AIforBusiness #SmallBusinessIndia #AutomationStats #WorkflowROI',
+   topic:'Automation ROI Real Numbers',likes:356,comments:61,reach:4420,impressions:5360,er:8.4,
+   date:makeDate(12,11),ai:true,auto:true,
+   reasoning:'Financial ROI content with specific numbers is the highest-converting content type.'},
+  {id:14,img:'https://picsum.photos/seed/agp14/600/600',
+   caption:'⭐ Another Client Win!\n\n"Pehle hum WhatsApp pe 200+ messages manually handle karte the. Ab n8n bot sab karta hai!" — @sheena_boutique\n\nKya setup kiya:\n✅ Product inquiry auto-reply\n✅ Order status updates\n✅ Payment confirmation\n✅ Delivery tracking\n\nResult: 40% more sales, zero missed messages! 🎉',
+   hashtags:'#ClientWin #WhatsAppAutomation #BoutiqueAutomation #EcommerceAutomation #ClientTestimonial #n8n #BusinessSuccess',
+   topic:'Boutique Client Win Story',likes:241,comments:35,reach:3010,impressions:3720,er:6.2,
+   date:makeDate(13,10),ai:true,auto:true,
+   reasoning:'Industry-specific success stories (boutique) resonate with target segment. Concrete % numbers.'},
+  {id:15,img:'https://picsum.photos/seed/agp15/600/600',
+   caption:'📱 Social Media Automation — Complete Guide!\n\nKya aap jaante hain? Successful brands apni 80% social media activity automate karte hain.\n\nYahan hai complete stack:\n🔄 n8n — workflow engine\n🤖 Claude AI — content generation\n📸 Instagram Graph API — posting\n💬 WhatsApp API — notifications\n📊 Analytics — performance tracking\n\nYeh sab hum clients ke liye build karte hain! Interested? 👆 Bio mein link hai.',
+   hashtags:'#SocialMediaAutomation #MarketingAutomation #InstagramAPI #n8n #Claude #FullStack #DigitalMarketing #ContentAutomation',
+   topic:'Social Media Full-Stack Guide',likes:334,comments:54,reach:4160,impressions:5120,er:8.1,
+   date:makeDate(14,9),ai:true,auto:true,
+   reasoning:'Complete stack overview establishes expertise. 80% statistic is compelling and shareable.'},
+  {id:16,img:'https://picsum.photos/seed/agp16/600/600',
+   caption:'🆚 AI Tools Comparison 2026 — Which One to Use?\n\n📝 Writing & Strategy:\n🥇 Claude Sonnet — best reasoning\n🥈 GPT-4o — good for coding\n\n🎨 Images:\n🥇 Midjourney v7 — most realistic\n🥈 DALL-E 3 — great for illustrations\n\n⚙️ Automation:\n🥇 n8n — open source, free\n🥈 Make/Zapier — easier setup\n\nYour pick kya hai? Poll in stories! 📊',
+   hashtags:'#AIComparison #Claude #GPT4 #Midjourney #n8n #AITools2026 #ChooseRight #ProductivityAI #AIForWork',
+   topic:'AI Tools Comparison Chart',likes:521,comments:108,reach:6890,impressions:8540,er:9.8,
+   date:makeDate(15,10),ai:false,auto:false,
+   reasoning:'Comparison/versus content is highest-engagement format. Poll CTA drives story views.'},
+  {id:17,img:'https://picsum.photos/seed/agp17/600/600',
+   caption:'❓ Automation Myths — Busted!\n\n❌ MYTH: "Automation is only for big companies"\n✅ TRUTH: We automate for solopreneurs & SMBs daily!\n\n❌ MYTH: "It\'s too expensive"\n✅ TRUTH: n8n is FREE & open source!\n\n❌ MYTH: "Coding required"\n✅ TRUTH: No code needed — drag & drop!\n\n❌ MYTH: "It feels robotic"\n✅ TRUTH: AI makes it sound human!\n\nKaunsa myth aap believe karte the? 👇',
+   hashtags:'#AutomationMyths #NoCode #n8n #MythBusting #BusinessAutomation #AIAutomation #WorkSmart #TechForAll',
+   topic:'Automation Myths Debunked',likes:278,comments:67,reach:3480,impressions:4320,er:7.4,
+   date:makeDate(16,11),ai:true,auto:true,
+   reasoning:'Myth-busting format removes objections and qualifies leads. Comment bait with personal myth drives engagement.'},
+  {id:18,img:'https://picsum.photos/seed/agp18/600/600',
+   caption:'🎁 Free n8n Template — Instagram Auto-Post Workflow!\n\nHum share kar rahe hain hamara complete Instagram automation template:\n\n✅ Daily AI content generation\n✅ Best time detection\n✅ Auto-publish + WhatsApp notification\n✅ Manual review mode\n\nComment "TEMPLATE" aur hum DM karte hain! 🚀\n\n⏰ Limited time — Free for first 50 people only!',
+   hashtags:'#FreeTemplate #n8nTemplate #InstagramAutomation #GiveawayAlert #OpenSource #WorkflowTemplate #AutomationFree',
+   topic:'Free n8n Template Giveaway',likes:634,comments:187,reach:8920,impressions:11200,er:14.2,
+   date:makeDate(17,9),ai:false,auto:false,
+   reasoning:'Free giveaway content gets 5-10x engagement spike. "Limited" scarcity drives urgency.'},
+  {id:19,img:'https://picsum.photos/seed/agp19/600/600',
+   caption:'🧠 Growth Mindset for Automation Business!\n\nJo main seekha 3 saal mein:\n\n1. Start small, automate one thing first\n2. Data > Gut feel — always check analytics\n3. Client results > your own convenience\n4. Teach what you learn — content is proof\n5. Automation frees time, use it to create more value\n\nKaunsi point aapke liye most valuable hai? 💬',
+   hashtags:'#GrowthMindset #AutomationJourney #EntrepreneurMindset #BusinessLearning #3YearsIn #StartupIndia #DigitalEntrepreneur',
+   topic:'Founder Lessons & Mindset',likes:223,comments:41,reach:2790,impressions:3450,er:6.0,
+   date:makeDate(18,10),ai:true,auto:true,
+   reasoning:'Personal story + lessons format drives authentic engagement. Numbered tips are bookmark-worthy.'},
+  {id:20,img:'https://picsum.photos/seed/agp20/600/600',
+   caption:'📅 Week in Review — August 21!\n\nIs hafte:\n\n🎯 3 automation projects shipped\n📸 7 posts published (all AI-generated!)\n💬 45 DMs answered (automation ne!)\n👥 +189 new followers\n\n💡 This week\'s learning: The best automation is the one that saves time while feeling personal.\n\nComment: Apna week kaisa tha? 👇',
+   hashtags:'#WeekInReview #ProductivityWin #AutomationLife #DigitalMarketing #ContentCreator #WeeklyRecap #BusinessJourney',
+   topic:'Weekly Review Recap',likes:189,comments:38,reach:2360,impressions:2940,er:5.8,
+   date:makeDate(19,11),ai:true,auto:true,
+   reasoning:'Weekly recap creates routine check-ins with audience. Personal tone drives comments.'},
+  {id:21,img:'https://picsum.photos/seed/agp21/600/600',
+   caption:'🤔 Chatbot vs AI Agent — What\'s the Difference?\n\nBahut log confuse hote hain. Samjhao:\n\n🤖 CHATBOT:\n• Pre-defined responses\n• Flow-based\n• Limited understanding\n• Examples: WhatsApp menu bots\n\n🧠 AI AGENT:\n• Understands context\n• Can reason & decide\n• Learns from conversation\n• Examples: Claude-powered bots\n\nHamara system? AI Agent powered by n8n + Claude! 💡',
+   hashtags:'#ChatbotVsAI #AIAgent #WhatsAppBot #Claude #Automation #AIExplained #ConversationalAI #BusinessBot',
+   topic:'Chatbot vs AI Agent Explained',likes:367,comments:73,reach:4580,impressions:5640,er:8.6,
+   date:makeDate(20,9),ai:false,auto:false,
+   reasoning:'Educational explainer content builds authority. Clear distinction satisfies curiosity and drives saves.'},
+  {id:22,img:'https://picsum.photos/seed/agp22/600/600',
+   caption:'📸 Instagram Graph API — What You Can Do!\n\nBahut kam log jaante hain Instagram API ki power:\n\n✅ Auto-post images + Reels\n✅ Fetch your analytics\n✅ Monitor comments\n✅ DM automation\n✅ Hashtag research\n✅ Competitor analysis\n\nAur yeh sab bina 3rd party tools ke!\n\nHum yeh sab n8n se karte hain. Tutorial blog bio mein! 📖',
+   hashtags:'#InstagramAPI #GraphAPI #InstagramDev #SocialMediaDev #n8n #APIIntegration #TechBusiness #MetaAPI',
+   topic:'Instagram API Capabilities',likes:312,comments:48,reach:3890,impressions:4780,er:7.6,
+   date:makeDate(21,10),ai:true,auto:true,
+   reasoning:'Technical capability post attracts developer + business audience. API content gets saved for reference.'},
+  {id:23,img:'https://picsum.photos/seed/agp23/600/600',
+   caption:'📧 Email + WhatsApp Automation — Best Combo!\n\nClient journey automation:\n\n1️⃣ Lead fills form → Instant WhatsApp welcome\n2️⃣ 24 hrs later → Email with case study\n3️⃣ 3 days → WhatsApp follow-up (personalized)\n4️⃣ Week 2 → Email proposal\n5️⃣ Week 3 → Final WhatsApp push\n\nResult: 3x higher conversion rate! 📈\n\nWant this setup? DM "JOURNEY" 🚀',
+   hashtags:'#EmailAutomation #WhatsAppAutomation #LeadNurturing #CustomerJourney #MarketingFunnel #ConversionRate #n8n #CRMAutomation',
+   topic:'Email + WhatsApp Lead Journey',likes:267,comments:44,reach:3340,impressions:4120,er:7.0,
+   date:makeDate(22,9),ai:true,auto:true,
+   reasoning:'Multi-channel sequence content shows sophisticated strategy. 3x conversion claim is compelling.'},
+  {id:24,img:'https://picsum.photos/seed/agp24/600/600',
+   caption:'⏱️ Calculate Your Time Savings!\n\nQuick math:\n\nManual social media:\n• 45 min/day × 30 = 22.5 hrs/month\n\nWith Automation:\n• 30 min setup + 2 hrs/month review\n\nTime Saved: 20 hours/month 🔥\n\nAt ₹500/hr value = ₹10,000 saved!\n\nAutomation cost: ₹3-5K/month\n\nNet profit: ₹5-7K + more consistent growth!\n\nDoes this math work for you? 👇',
+   hashtags:'#TimeSavings #AutomationROI #TimeIsMoney #BusinessMath #SocialMediaAutomation #WorkSmart #ROICalculation',
+   topic:'Time Savings Calculator Post',likes:298,comments:52,reach:3720,impressions:4580,er:7.4,
+   date:makeDate(23,11),ai:true,auto:true,
+   reasoning:'Calculator/math content is highly shareable. Specific rupee values resonate with Indian SMB audience.'},
+  {id:25,img:'https://picsum.photos/seed/agp25/600/600',
+   caption:'🚀 Getting Started with Automation in 2026!\n\nAgar aap automation journey shuru karna chahte hain, toh yeh hai roadmap:\n\nWeek 1: n8n install + basic flows\nWeek 2: WhatsApp Business API setup\nWeek 3: Instagram API integration\nWeek 4: AI-powered content generation\n\n4 haftein mein aapka poora social media automated! 🎯\n\nReady hain? Like karo agar aap start karne wale hain! ❤️',
+   hashtags:'#AutomationRoadmap #GettingStarted #n8n #WhatsAppAPI #InstagramAutomation #BeginnerGuide #2026Goals #TechJourney',
+   topic:'Automation Roadmap 2026',likes:445,comments:84,reach:5560,impressions:6870,er:9.1,
+   date:makeDate(24,10),ai:false,auto:false,
+   reasoning:'Roadmap content establishes clear path and gets saved for future reference. Like CTA drives algorithm boost.'}
+];
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let currentFilter = 'all';
+let currentSearch = '';
+let calendarMonth = 8; // 0-indexed, 8 = September
+let calendarYear = 2026;
+let charts = {};
+let currentModalPost = null;
+let generatedCaption = '';
+let generatedHashtags = '';
+
+// ══════════════════════════════════════════════
+//  TAB SWITCHING
+// ══════════════════════════════════════════════
+function switchTab(id, navEl, title, sub) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  if (title) {
+    document.getElementById('page-title').textContent = title;
+    document.getElementById('page-sub').innerHTML = sub || '';
+  }
+  if (id === 'analytics' && !charts.reach) initAnalyticsCharts();
+  if (id === 'calendar') renderCalendar();
+}
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+function fmtNum(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+  return n.toString();
+}
+function fmtDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+}
+function timeAgo(iso) {
+  const diff = (REF - new Date(iso)) / 1000;
+  if (diff < 3600) return Math.floor(diff/60) + ' mins ago';
+  if (diff < 86400) return Math.floor(diff/3600) + ' hours ago';
+  if (diff < 172800) return 'Yesterday';
+  return Math.floor(diff/86400) + ' days ago';
+}
+function getBadgeHTML(post) {
+  let b = '';
+  if (post.ai) b += '<span class="tag tag-pk post-badge pb-ai">🤖 AI</span> ';
+  if (post.auto) b += '<span class="tag tag-s post-badge pb-auto">⚡ Auto</span>';
+  else if (!post.auto && !post.ai) b += '<span class="tag tag-i post-badge pb-manual">✍️ Manual</span>';
+  return b;
+}
+
+// ══════════════════════════════════════════════
+//  POST CARD BUILDER
+// ══════════════════════════════════════════════
+function buildPostCard(post, clickable=true) {
+  const div = document.createElement('div');
+  div.className = 'post-card';
+  if (clickable) div.onclick = () => openModal(post);
+  div.innerHTML = `
+    <img class="post-img" src="${post.img}" alt="" loading="lazy">
+    <div class="post-overlay">
+      <div class="ov-stat">❤️ ${fmtNum(post.likes)}</div>
+      <div class="ov-stat">💬 ${post.comments}</div>
+      <div class="ov-stat">👁️ ${fmtNum(post.reach)}</div>
+    </div>
+    ${post.ai ? '<span class="post-badge pb-ai">🤖 AI</span>' : ''}
+    ${post.auto ? '<span class="post-badge pb-auto" style="top:7px;left:auto;right:7px;">⚡</span>' : ''}
+    <div class="post-info">
+      <div class="post-topic">${post.topic}</div>
+      <div class="post-stats-row">
+        <div class="psr">❤️ ${fmtNum(post.likes)}</div>
+        <div class="psr">💬 ${post.comments}</div>
+        <div class="psr" style="margin-left:auto;">${post.er}%</div>
+      </div>
+    </div>`;
+  return div;
+}
+
+// ══════════════════════════════════════════════
+//  DASHBOARD INIT
+// ══════════════════════════════════════════════
+function initDashboard() {
+  // Recent posts (last 8)
+  const grid = document.getElementById('dash-recent-posts');
+  POSTS.slice(0, 8).forEach(p => grid.appendChild(buildPostCard(p)));
+
+  // Engagement trend chart
+  const days14 = Array.from({length:14}, (_,i) => {
+    const d = new Date(REF);
+    d.setDate(d.getDate() - (13 - i));
+    return d.toLocaleDateString('en-IN', {day:'numeric', month:'short'});
+  });
+  const engData = [3.8, 4.1, 3.9, 4.5, 4.2, 5.1, 4.7, 4.9, 5.3, 4.8, 6.1, 5.6, 5.9, 6.4];
+
+  charts.engagement = new Chart(document.getElementById('chartEngagement'), {
+    type: 'line',
+    data: {
+      labels: days14,
+      datasets: [{
+        label: 'Engagement Rate %',
+        data: engData,
+        borderColor: '#E1306C',
+        backgroundColor: 'rgba(225,48,108,0.08)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: '#E1306C',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e1e30', titleColor: '#fff', bodyColor: '#8a8fb5' } },
+      scales: {
+        x: { grid: { color: '#22243a' }, ticks: { color: '#4a4d6e', font: { size: 10 } } },
+        y: { grid: { color: '#22243a' }, ticks: { color: '#4a4d6e', font: { size: 10 }, callback: v => v + '%' }, min: 2, max: 8 }
+      }
+    }
+  });
+
+  // Content mix doughnut
+  charts.mix = new Chart(document.getElementById('chartMix'), {
+    type: 'doughnut',
+    data: {
+      labels: ['AI Generated', 'Manual', 'AI + Manual Edit'],
+      datasets: [{
+        data: [14, 7, 4],
+        backgroundColor: ['#E1306C','#833AB4','#F77737'],
+        borderWidth: 0,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#8a8fb5', font: { size: 11 }, boxWidth: 10, padding: 12 } },
+        tooltip: { backgroundColor: '#1e1e30', titleColor: '#fff', bodyColor: '#8a8fb5' }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+//  POSTS LIBRARY
+// ══════════════════════════════════════════════
+function renderPostsGrid() {
+  const grid = document.getElementById('all-posts-grid');
+  grid.innerHTML = '';
+  let filtered = POSTS.filter(p => {
+    if (currentFilter === 'ai' && !p.ai) return false;
+    if (currentFilter === 'auto' && !p.auto) return false;
+    if (currentFilter === 'manual' && (p.ai || p.auto)) return false;
+    if (currentSearch && !p.topic.toLowerCase().includes(currentSearch) && !p.caption.toLowerCase().includes(currentSearch)) return false;
+    return true;
+  });
+  document.getElementById('posts-count-label').textContent = `Showing ${filtered.length} posts`;
+  filtered.forEach(p => grid.appendChild(buildPostCard(p)));
+}
+
+function filterPosts(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderPostsGrid();
+}
+
+function searchPosts(val) {
+  currentSearch = val.toLowerCase();
+  renderPostsGrid();
+}
+
+// ══════════════════════════════════════════════
+//  CALENDAR
+// ══════════════════════════════════════════════
+function changeMonth(delta) {
+  calendarMonth += delta;
+  if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+  if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const mn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-lbl').textContent = `${mn[calendarMonth]} ${calendarYear}`;
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+  const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+  const monthPosts = POSTS.filter(p => {
+    const d = new Date(p.date);
+    return d.getFullYear() === calendarYear && d.getMonth() === calendarMonth;
+  });
+  for (let i = 0; i < firstDay; i++) {
+    const emp = document.createElement('div');
+    emp.className = 'cal-cell empty';
+    grid.appendChild(emp);
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const cell = document.createElement('div');
+    const dayPosts = monthPosts.filter(p => new Date(p.date).getDate() === day);
+    const isToday = calendarYear === 2026 && calendarMonth === 8 && day === 9;
+    cell.className = 'cal-cell' + (isToday ? ' today' : '') + (dayPosts.length ? ' has-post' : '');
+    let inner = `<div class="cal-date-num">${day}</div>`;
+    if (dayPosts.length > 0) {
+      inner += `<img class="cal-thumb" src="${dayPosts[0].img}" alt="" loading="lazy">`;
+      inner += `<div class="cal-mini-topic">${dayPosts[0].topic}</div>`;
+    }
+    cell.innerHTML = inner;
+    if (dayPosts.length) cell.onclick = () => openModal(dayPosts[0]);
+    grid.appendChild(cell);
+  }
+}
+
+// ══════════════════════════════════════════════
+//  MODAL
+// ══════════════════════════════════════════════
+function openModal(post) {
+  currentModalPost = post;
+  document.getElementById('modal-img').src = post.img;
+  document.getElementById('modal-caption').textContent = post.caption;
+  document.getElementById('modal-hashtags').textContent = post.hashtags;
+  document.getElementById('modal-time').textContent = fmtDate(post.date);
+  document.getElementById('modal-likes').textContent = fmtNum(post.likes);
+  document.getElementById('modal-comments').textContent = post.comments;
+  document.getElementById('modal-reach').textContent = fmtNum(post.reach);
+  document.getElementById('modal-er').textContent = post.er + '%';
+  document.getElementById('modal-reasoning').textContent = post.reasoning;
+  document.getElementById('modal-badge-area').innerHTML = getBadgeHTML(post);
+  document.getElementById('post-modal-bg').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('post-modal-bg').classList.remove('open');
+  currentModalPost = null;
+}
+
+function copyModalCaption() {
+  if (!currentModalPost) return;
+  navigator.clipboard.writeText(currentModalPost.caption + '\n\n' + currentModalPost.hashtags)
+    .then(() => showToast('📋 Caption copied to clipboard!', 's'))
+    .catch(() => showToast('📋 Copy failed — try manually', 'w'));
+}
+
+// ══════════════════════════════════════════════
+//  GENERATE POST
+// ══════════════════════════════════════════════
+const genMode = {mode: 'auto'};
+
+function setGenMode(m, el) {
+  genMode.mode = m;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('auto-fields').style.display = m === 'auto' ? 'block' : 'none';
+  document.getElementById('prompt-fields').style.display = m === 'prompt' ? 'block' : 'none';
+}
+
+const SAMPLE_CAPS = [
+  {cap:`💡 Aaj ka tip — Automation से business kyun badhta hai?\n\nHum rooz 50+ entrepreneurs se baat karte hain. Sabka ek common problem hai: TIME.\n\n⚡ Automation ka magic:\n• Daily posting without effort\n• Instant customer replies\n• Zero missed opportunities\n\nResult? 3x more growth with 80% less effort!\n\nAapka sabse bada time-waster kya hai? Comment karo! 👇`, hash:'#AutomationMagic #BusinessGrowth #AIAutomation #TimeManagement #WorkSmart #EntrepreneurIndia #DigitalMarketing #n8nWorkflow #BusinessTips2026 #SmallBusinessIndia', reason:'Best posting time detected: 9 AM IST (peak engagement window from your last 7 days data). Educational format with direct question CTA drives 2.4x more comments. "3x" specific metric increases credibility and shareability.'},
+  {cap:`🔥 Secret sauce of successful automation:\n\nYeh sirf tools nahi hai — yeh STRATEGY hai!\n\n📊 Phase 1: Analyse (What to automate?)\n⚙️ Phase 2: Build (n8n + AI setup)\n🧪 Phase 3: Test (2 weeks monitoring)\n🚀 Phase 4: Scale (More automation!)\n\nHamari process ne 100+ businesses transform kiye hain!\n\nKis phase pe ho aap abhi? 1, 2, 3, ya 4? 👇`, hash:'#AutomationStrategy #BusinessSystems #ProcessAutomation #n8n #AIBusiness #ScaleUp #WorkflowDesign #SmartBusiness #AutomationJourney #GrowthHacking', reason:'Process/framework content is the most saved format. Numbered phases create clear structure. Number reply CTA is easiest engagement action.'},
+  {cap:`🎯 WhatsApp + Instagram automation = Ultimate combo!\n\nEk real example:\n\n1. Instagram post → Comment triggers DM\n2. DM → WhatsApp welcome message auto-sent\n3. WhatsApp → Lead qualification bot\n4. Qualified? → Human follow-up\n\nConversion rate: 34% 🚀\n\nYeh sab humne kiya ek coaching client ke liye!\n\nInterested? DM "COMBO" karo! 📩`, hash:'#WhatsAppInstagram #OmnichannelMarketing #LeadConversion #ComboStrategy #AutomationFunnel #WhatsAppMarketing #InstagramMarketing #SalesAutomation #LeadGenIndia', reason:'Multi-platform combo content shows sophisticated strategy. 34% conversion rate is highly credible and compelling. DM keyword CTA is trackable.'}
+];
+
+function generatePost() {
+  const ph = document.getElementById('gen-placeholder');
+  const sp = document.getElementById('gen-spinner');
+  const fr = document.getElementById('ig-preview-frame');
+  const mc = document.getElementById('gen-meta');
+  const pa = document.getElementById('gen-pub-actions');
+
+  ph.style.display = 'none';
+  sp.classList.add('show');
+  fr.classList.remove('show');
+  mc.classList.remove('show');
+  pa.classList.remove('show');
+
+  const imgSrc = document.getElementById('gen-image-sel').value;
+  const sample = SAMPLE_CAPS[Math.floor(Math.random() * SAMPLE_CAPS.length)];
+
+  setTimeout(() => {
+    sp.classList.remove('show');
+
+    generatedCaption = sample.cap;
+    generatedHashtags = sample.hash;
+
+    document.getElementById('gen-prev-img').src = imgSrc;
+    document.getElementById('gen-prev-cap').textContent = sample.cap.substring(0, 180) + '…';
+    document.getElementById('gen-prev-hash').textContent = sample.hash.split(' ').slice(0, 8).join(' ') + '…';
+    document.getElementById('gen-prev-likes').textContent = '— likes';
+    document.getElementById('gen-meta-text').textContent = sample.reason;
+
+    fr.classList.add('show');
+    mc.classList.add('show');
+    pa.style.display = 'flex';
+    pa.classList.add('show');
+
+    showToast('✨ Post generated by Claude!', 's');
+  }, 2600);
+}
+
+function copyGenCaption() {
+  if (!generatedCaption) return;
+  navigator.clipboard.writeText(generatedCaption + '\n\n' + generatedHashtags)
+    .then(() => showToast('📋 Caption copied!', 's'))
+    .catch(() => showToast('Copy failed', 'w'));
+}
+
+function publishGenPost() {
+  const autoOn = document.getElementById('gen-auto-pub').checked;
+  if (autoOn) {
+    showToast('🚀 Publishing to Instagram…', 'i');
+    setTimeout(() => showToast('✅ Post published! WhatsApp notification sent.', 's'), 2200);
+  } else {
+    showToast('📤 Post sent for manual review via WhatsApp!', 'i');
+  }
+}
+
+// ══════════════════════════════════════════════
+//  ANALYTICS CHARTS
+// ══════════════════════════════════════════════
+function initAnalyticsCharts() {
+  const days30 = Array.from({length:30}, (_,i) => {
+    const d = new Date(REF);
+    d.setDate(d.getDate() - (29 - i));
+    return d.toLocaleDateString('en-IN', {day:'numeric', month:'short'});
+  }).filter((_,i) => i % 3 === 0);
+
+  const reachData = [2100,2400,2200,2800,3100,2900,3400,3200,3800,3600];
+  const impressData = [2800,3100,2900,3600,3900,3700,4400,4100,4900,4600];
+
+  charts.reach = new Chart(document.getElementById('chartReach'), {
+    type: 'bar',
+    data: {
+      labels: days30,
+      datasets: [
+        { label: 'Reach', data: reachData, backgroundColor: 'rgba(131,58,180,0.6)', borderRadius: 4 },
+        { label: 'Impressions', data: impressData, backgroundColor: 'rgba(225,48,108,0.4)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#8a8fb5', font: { size: 11 } } }, tooltip: { backgroundColor: '#1e1e30' } },
+      scales: {
+        x: { grid: { color: '#22243a' }, ticks: { color: '#4a4d6e', font: { size: 10 } } },
+        y: { grid: { color: '#22243a' }, ticks: { color: '#4a4d6e', font: { size: 10 } } }
+      }
+    }
+  });
+
+  charts.postType = new Chart(document.getElementById('chartPostType'), {
+    type: 'bar',
+    data: {
+      labels: ['AI Generated', 'Manual', 'AI Edited', 'Reels', 'Carousel'],
+      datasets: [{
+        label: 'Avg Engagement %',
+        data: [8.2, 5.4, 7.1, 9.8, 7.6],
+        backgroundColor: ['#E1306C','#833AB4','#F77737','#FCAF45','#00d4aa'],
+        borderRadius: 6,
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e1e30' } },
+      scales: {
+        x: { grid: { color: '#22243a' }, ticks: { color: '#4a4d6e', font: { size: 10 }, callback: v => v + '%' } },
+        y: { grid: { color: '#22243a33' }, ticks: { color: '#8a8fb5', font: { size: 11 } } }
+      }
+    }
+  });
+
+  // Heatmap
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const wrap = document.getElementById('heatmap-wrap');
+  wrap.innerHTML = '';
+  const hmData = {
+    Mon:  [0,0,0,0,0,0,1,2,7,9,8,5,4,5,4,3,4,6,8,7,5,3,2,1],
+    Tue:  [0,0,0,0,0,0,1,3,8,10,7,5,4,4,3,3,5,7,9,8,6,3,2,1],
+    Wed:  [0,0,0,0,0,0,2,3,6,8,9,6,5,4,3,4,5,7,8,6,5,3,1,0],
+    Thu:  [0,0,0,0,0,0,1,2,5,7,8,7,5,4,4,4,6,8,9,7,5,3,2,1],
+    Fri:  [0,0,0,0,0,0,1,2,4,6,7,8,6,5,4,5,6,7,8,9,7,5,3,2],
+    Sat:  [0,0,0,0,0,1,2,4,6,7,6,5,5,5,4,4,5,6,7,7,6,5,4,2],
+    Sun:  [0,0,0,0,0,0,1,2,5,7,7,6,5,4,4,4,5,6,7,8,7,5,3,2]
+  };
+  days.forEach(day => {
+    const row = document.createElement('div');
+    row.className = 'hm-row';
+    row.innerHTML = `<div class="hm-lbl">${day}</div><div class="hm-cells" id="hm-${day}"></div>`;
+    wrap.appendChild(row);
+    const cells = row.querySelector('.hm-cells');
+    hmData[day].forEach((val, h) => {
+      const c = document.createElement('div');
+      c.className = 'hm-cell';
+      const alpha = val === 0 ? 0.05 : 0.1 + val * 0.09;
+      const r = Math.floor(225 * val/10 + 131 * (1-val/10));
+      const g = Math.floor(48 * val/10);
+      const b = Math.floor(108 * val/10 + 180 * (1-val/10));
+      c.style.background = val === 0 ? 'rgba(255,255,255,0.03)' : `rgba(${r},${g},${b},${alpha})`;
+      c.title = `${day} ${h}:00 — Engagement: ${val}/10`;
+      cells.appendChild(c);
+    });
+  });
+
+  // Top posts table
+  const tbody = document.getElementById('top-posts-tbody');
+  const sorted = [...POSTS].sort((a,b) => b.er - a.er).slice(0, 10);
+  sorted.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><img class="tbl-thumb" src="${p.img}" alt=""></td>
+      <td><div class="tbl-topic">${p.topic}</div></td>
+      <td style="color:var(--text2);font-size:11px;">${new Date(p.date).toLocaleDateString('en-IN', {day:'numeric',month:'short'})}</td>
+      <td>${fmtNum(p.likes)}</td>
+      <td>${p.comments}</td>
+      <td>${fmtNum(p.reach)}</td>
+      <td><span class="tag ${p.er >= 9 ? 'tag-s' : p.er >= 7 ? 'tag-p' : 'tag-i'}">${p.er}%</span></td>
+      <td>${getBadgeHTML(p)}</td>`;
+    tr.onclick = () => openModal(p);
+    tr.style.cursor = 'pointer';
+    tbody.appendChild(tr);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg, type='s') {
+  const t = document.getElementById('toast');
+  const ico = {s:'✅', w:'⚠️', i:'ℹ️', e:'❌'};
+  document.getElementById('toast-ico').textContent = ico[type] || '✅';
+  document.getElementById('toast-txt').textContent = msg;
+  t.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('visible'), 3000);
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  initDashboard();
+  renderPostsGrid();
+  renderCalendar();
+});
+</script>
+</body>
+</html>
