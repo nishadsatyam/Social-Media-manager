@@ -1399,7 +1399,6 @@ Include an engaging caption and relevant hashtags.`;
     }
 
     const data = await response.json();
-
     const post = data.postData || data;
 
     generatedCaption = post.caption || '';
@@ -1408,6 +1407,7 @@ Include an engaging caption and relevant hashtags.`;
     const imgSrc = document.getElementById('gen-image-sel').value;
 
     document.getElementById('gen-prev-img').src = imgSrc;
+
     document.getElementById('gen-prev-cap').textContent =
       generatedCaption.substring(0, 180) + '…';
 
@@ -1428,13 +1428,13 @@ Include an engaging caption and relevant hashtags.`;
     showToast('✨ AI post generated successfully!', 's');
 
   } catch (error) {
+    console.error(error);
+
     sp.classList.remove('show');
     ph.style.display = 'block';
 
-    console.error(error);
     showToast('❌ n8n connection failed', 'w');
   }
-}
 }
 
 function copyGenCaption() {
